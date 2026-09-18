@@ -253,3 +253,9 @@ function eosdoSelfCheck(){let required=["homeView","docsView","tasksView","creat
 function resetDemoData(){if(!confirm("Сбросить локальные данные EOSDO-Lite и восстановить демонстрационные документы?"))return;localStorage.removeItem(KEY);localStorage.removeItem("eosdo-lite-extra-v1");localStorage.removeItem("eosdo-lite-archive-v1");localStorage.removeItem("eosdo-lite-medo-v1");localStorage.removeItem("eosdo-lite-sign-v1");localStorage.removeItem("eosdo-lite-master-v1");location.reload()}
 window.EOSDO={selfCheck:eosdoSelfCheck,resetDemoData};
 eosdoSelfCheck();
+
+
+/* EOSDO visible diagnostics */
+function renderDiagnostics(){let el=$("#diagnosticsResult");if(!el)return;let r=eosdoSelfCheck(),tests=[["Основные экраны",r.ok],["Создание документа",!!$("#newDoc")&&!!$("#createDlg")&&!!$("#createForm")],["Реестр документов",!!$("#docsView")&&!!$("#docTable")],["Задачи",!!$("#tasksView")&&!!$("#taskList")],["Отчёты",!!$("#reportsView")&&!!$("#reportWorkspace")],["МЭДО",!!$("#medoView")&&!!$("#medoList")],["Архив",!!$("#archiveView")&&!!$("#orgarchiveView")],["Аудит",!!$("#auditView")&&!!$("#auditTable")]];el.innerHTML=tests.map(x=>`<div class="row"><div><strong>${x[0]}</strong><span>${x[1]?"Компоненты найдены":"Ошибка конфигурации"}</span></div><span class="badge ${x[1]?"reg":"rework"}">${x[1]?"OK":"Ошибка"}</span></div>`).join("")+`<p><small>Проверено: ${new Date().toLocaleString("ru-RU")}</small></p>`}
+document.addEventListener("click",e=>{if(e.target.closest("[data-run-selfcheck]")){renderDiagnostics();toast("Самопроверка завершена")}if(e.target.closest('[data-view="diagnostics"]'))setTimeout(renderDiagnostics,0)});
+renderDiagnostics();
