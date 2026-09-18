@@ -59,3 +59,21 @@
   .view{padding-left:12px!important;padding-right:12px!important}
   .title h1{font-size:28px!important}
 }
+
+/* iOS dialog layout fix */
+#createDlg{box-sizing:border-box;max-height:min(88dvh,820px);overflow:hidden}
+#createDlg form{box-sizing:border-box;max-height:min(88dvh,820px);overflow-y:auto;overflow-x:hidden}
+#createDlg .dh{position:sticky;top:-22px;z-index:2;background:#fff;padding-top:22px}
+#createDlg label,#createDlg input,#createDlg select,#createDlg textarea,#createDlg #typeFields{box-sizing:border-box;min-width:0;max-width:100%}
+#createDlg input,#createDlg select,#createDlg textarea{width:100%;font-size:16px}
+#createDlg input[type="file"]{padding:8px;overflow:hidden}
+#createDlg textarea{min-height:86px;resize:vertical}
+@media(max-width:600px){
+ #createDlg{width:calc(100vw - 24px)!important;max-width:calc(100vw - 24px)!important;margin:auto!important;border-radius:14px!important}
+ #createDlg form{padding:16px!important;gap:12px!important}
+ #createDlg .dh{top:-16px;margin:0 -2px;padding:16px 2px 8px}
+ #createDlg .dh h2{font-size:24px;line-height:1.15}
+ #createDlg .cols,#createDlg #typeFields{grid-template-columns:minmax(0,1fr)!important}
+ #createDlg .actions{position:sticky;bottom:-16px;background:#fff;padding:10px 0 16px;z-index:2}
+ #createDlg .actions button{min-height:44px}
+}
