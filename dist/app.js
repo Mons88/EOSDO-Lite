@@ -123,8 +123,8 @@ return `<div class="wf"><h3>Договорная работа</h3>
 <div class="row"><span>Оригинал договора</span><span class="badge">${x.originalReceived?"Получен":"Ожидается"}</span></div>
 <div class="row"><span>Передача в архив</span><span class="badge">${x.archiveTransferred?"Передан":"Не передан"}</span></div>
 <div class="actions"><button data-contract="counterparty" data-id="${d.id}">Подпись контрагента</button><button data-contract="original" data-id="${d.id}">Получить оригинал</button><button data-contract="archive" data-id="${d.id}">Передать в архив</button><button data-contract="close" data-id="${d.id}">Завершить договор</button></div></div>`}
-const contractOpenDoc=openDoc;
-openDoc=function(id){contractOpenDoc(id);let d=docs.find(x=>x.id===id),body=$("#drawerBody");if(d&&body)body.insertAdjacentHTML("beforeend",contractPanel(d))}
+const contractLifecycleOpenDoc=openDoc;
+openDoc=function(id){contractLifecycleOpenDoc(id);let d=docs.find(x=>x.id===id),body=$("#drawerBody");if(d&&body)body.insertAdjacentHTML("beforeend",contractPanel(d))}
 document.addEventListener("click",e=>{let b=e.target.closest("[data-contract]");if(!b)return;let d=ensureContract(docs.find(x=>x.id===b.dataset.id)),x=d.contract;
 if(b.dataset.contract==="counterparty"){x.counterpartySigned=true;x.stage="Подписание";wfLog(d,"Получена подпись контрагента")}
 if(b.dataset.contract==="original"){x.originalReceived=true;x.stage="Оригинал получен";wfLog(d,"Получен оригинал договора")}
