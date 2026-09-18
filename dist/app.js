@@ -30,3 +30,37 @@ $("#freeOrder").onclick=()=>{let title=prompt("Текст поручения");i
 $("#reserveBtn").onclick=()=>{let n="РЗ-2026-"+String(extra.reserved.length+1).padStart(4,"0");extra.reserved.unshift(n);saveExtra();logAudit("Зарезервирован номер",n);toast("Номер "+n+" зарезервирован")};
 const oldMutate=mutate;mutate=function(id,act){let d=docs.find(x=>x.id===id),name=d?d.number:"Документ";oldMutate(id,act);logAudit("Операция: "+act,name)};
 renderExtra();
+
+/* EOSDO workflow expansion: approval/sign queues, links, comments, history and type requisites */
+function ensureWorkflow(d){
+ d.fields=d.fields||{};d.files=d.files||[];d.links=d.links||[];d.comments=d.comments||[];d.history=d.history||[];
+ d.approvalQueue=d.approvalQueue||[{name:"Руководитель подразделения",state:"Ожидает"},{name:"Согласующий",state:"Ожидает"}];
+ d.signQueue=d.signQueue||[{name:"Подписант",state:"Ожидает"}];
+ return d;
+}
+docs.forEach(ensureWorkflow);save();
+function wfLog(d,event){ensureWorkflow(d);d.history.unshift({at:new Date().toLocaleString("ru-RU"),event,user:"Алексей"});save();logAudit(event,d.number||d.title||d.id)}
+function wfAction(id,kind){
+ let d=ensureWorkflow(docs.find(x=>x.id===id));if(!d)return;
+ if(kind==="startApproval"){d.status="На согласовании";d.approvalQueue[0].state="На согласовании";wfLog(d,"Документ направлен на согласование")}
+ if(kind==="approveStage"){let q=d.approvalQueue.find(x=>x.state!=="Согласовано");if(q){q.state="Согласовано";let n=d.approvalQueue.find(x=>x.state==="Ожидает");if(n)n.state="На согласовании";else d.status="Согласован";wfLog(d,"Этап согласования завершён")}}
+ if(kind==="startSigning"){d.status="На подписании";d.signQueue[0].state="На подписании";wfLog(d,"Документ направлен на подписание")}
+ if(kind==="signStage"){let q=d.signQueue.find(x=>x.state!=="Подписано");if(q){q.state="Подписано";d.status="Подписан";wfLog(d,"Документ подписан")}}
+ save();render();openDoc(id);
+}
+function workflowPanel(d){
+ ensureWorkflow(d);
+ const queue=(title,a)=>`<div class="wf"><h3>${title}</h3>${a.map((x,i)=>`<div class="row"><span>${i+1}. ${x.name}</span><span class="badge">${x.state}</span></div>`).join("")}</div>`;
+ return `<div class="wfgrid">${queue("Очередь согласования",d.approvalQueue)}${queue("Очередь подписания",d.signQueue)}</div>
+ <div class="actions"><button data-wf="startApproval" data-id="${d.id}">На согласование</button><button data-wf="approveStage" data-id="${d.id}">Согласовать этап</button><button data-wf="startSigning" data-id="${d.id}">На подписание</button><button data-wf="signStage" data-id="${d.id}">Подписать</button></div>
+ <div class="wf"><h3>Связанные документы</h3>${d.links.map(x=>`<div class="row"><span>${x}</span></div>`).join("")||"<p>Связей нет</p>"}<button data-add-link="${d.id}">+ Добавить связь</button></div>
+ <div class="wf"><h3>Комментарии</h3>${d.comments.map(x=>`<div class="row"><span>${x.text}</span><small>${x.at}</small></div>`).join("")||"<p>Комментариев нет</p>"}<button data-add-comment="${d.id}">+ Добавить комментарий</button></div>
+ <div class="wf"><h3>История</h3>${d.history.map(x=>`<div class="row"><span>${x.event}</span><small>${x.at} · ${x.user}</small></div>`).join("")||"<p>История пуста</p>"}</div>`;
+}
+const baseOpenDoc=openDoc;
+openDoc=function(id){baseOpenDoc(id);let d=docs.find(x=>x.id===id);let body=$("#drawerBody");if(d&&body)body.insertAdjacentHTML("beforeend",workflowPanel(d))};
+document.addEventListener("click",e=>{
+ let w=e.target.closest("[data-wf]");if(w){wfAction(w.dataset.id,w.dataset.wf);return}
+ let l=e.target.closest("[data-add-link]");if(l){let d=ensureWorkflow(docs.find(x=>x.id===l.dataset.addLink));let v=prompt("Номер или название связанного документа");if(v){d.links.push(v);wfLog(d,"Добавлен связанный документ: "+v);openDoc(d.id)}return}
+ let m=e.target.closest("[data-add-comment]");if(m){let d=ensureWorkflow(docs.find(x=>x.id===m.dataset.addComment));let v=prompt("Комментарий");if(v){d.comments.unshift({text:v,at:new Date().toLocaleString("ru-RU")});wfLog(d,"Добавлен комментарий");openDoc(d.id)}}
+});
