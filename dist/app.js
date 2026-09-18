@@ -88,3 +88,21 @@ document.addEventListener("click",e=>{
  let na=e.target.closest("[data-new-assignment]");if(na){let d=ensureExecution(docs.find(x=>x.id===na.dataset.newAssignment)),text=prompt("Текст поручения");if(!text)return;let owner=prompt("Исполнитель","Алексей")||"Алексей",due=prompt("Срок исполнения","25.09.2026")||"не указан";d.assignments.push({text,owner,due,status:"На исполнении"});wfLog(d,"Создано поручение: "+text);openDoc(d.id);return}
  let ad=e.target.closest("[data-assignment-done]");if(ad){let [id,idx]=ad.dataset.assignmentDone.split(":"),d=ensureExecution(docs.find(x=>x.id===id)),a=d.assignments[Number(idx)];if(a){a.status="Исполнено";wfLog(d,"Исполнено поручение: "+a.text);if(d.assignments.length&&d.assignments.every(x=>x.status==="Исполнено")){d.executionStatus="Исполнено";d.route.push("Исполнение — завершено");wfLog(d,"Все поручения документа исполнены")}render();openDoc(d.id)}}
 });
+
+/* EOSDO power of attorney lifecycle per user guide */
+function isProxy(d){return d.type==="Заявка на доверенность"||d.type==="Доверенность"}
+function ensureProxy(d){ensureWorkflow(d);d.proxy=d.proxy||{issued:false,returned:false,originalAttached:false,issueDate:"",plannedReturn:"",returnDate:"",nonReturnable:false};return d}
+function proxyPanel(d){if(!isProxy(d))return "";ensureProxy(d);let p=d.proxy;return `<div class="wf"><h3>Доверенность: подлинник, выдача и возврат</h3>
+<div class="row"><span>Подлинник</span><span class="badge">${p.originalAttached?"Прикреплён":"Ожидается"}</span></div>
+<div class="row"><span>Выдача представителю</span><span class="badge">${p.issued?"Выдана":"Не выдана"}</span></div>
+${p.issued?`<div class="row"><span>Дата выдачи</span><strong>${p.issueDate||"—"}</strong></div><div class="row"><span>Плановая дата возврата</span><strong>${p.plannedReturn||"—"}</strong></div>`:""}
+<div class="row"><span>Возврат</span><span class="badge">${p.nonReturnable?"Не подлежит возврату":p.returned?"Возвращена":"Ожидается"}</span></div>
+<div class="actions"><button data-proxy-original="${d.id}">Прикрепить подлинник</button><button data-proxy-issue="${d.id}">Зафиксировать выдачу</button><button data-proxy-return="${d.id}">Зафиксировать возврат</button><button data-proxy-noreturn="${d.id}">Не подлежит возврату</button></div></div>`}
+const proxyOpenDoc=openDoc;
+openDoc=function(id){proxyOpenDoc(id);let d=docs.find(x=>x.id===id),body=$("#drawerBody");if(d&&body)body.insertAdjacentHTML("beforeend",proxyPanel(d))}
+document.addEventListener("click",e=>{
+ let po=e.target.closest("[data-proxy-original]");if(po){let d=ensureProxy(docs.find(x=>x.id===po.dataset.proxyOriginal));let input=document.createElement("input");input.type="file";input.accept=".pdf,.jpg,.jpeg,.png";input.onchange=()=>{let file=input.files[0];if(!file)return;d.files.push({name:file.name,size:file.size,type:file.type,lastModified:file.lastModified,role:"Подлинник доверенности"});d.proxy.originalAttached=true;wfLog(d,"Прикреплён подлинник доверенности");openDoc(d.id)};input.click();return}
+ let pi=e.target.closest("[data-proxy-issue]");if(pi){let d=ensureProxy(docs.find(x=>x.id===pi.dataset.proxyIssue));d.proxy.issued=true;d.proxy.issueDate=prompt("Дата выдачи",new Date().toLocaleDateString("ru-RU"))||"";d.proxy.plannedReturn=prompt("Плановая дата возврата","")||"";wfLog(d,"Доверенность выдана представителю");openDoc(d.id);return}
+ let pr=e.target.closest("[data-proxy-return]");if(pr){let d=ensureProxy(docs.find(x=>x.id===pr.dataset.proxyReturn));d.proxy.returned=true;d.proxy.returnDate=prompt("Дата возврата",new Date().toLocaleDateString("ru-RU"))||"";wfLog(d,"Зафиксирован возврат доверенности");openDoc(d.id);return}
+ let pn=e.target.closest("[data-proxy-noreturn]");if(pn){let d=ensureProxy(docs.find(x=>x.id===pn.dataset.proxyNoreturn));d.proxy.nonReturnable=!d.proxy.nonReturnable;wfLog(d,d.proxy.nonReturnable?"Доверенность отмечена как не подлежащая возврату":"Снята отметка о невозвратности доверенности");openDoc(d.id)}
+});
