@@ -44,14 +44,14 @@ function render(){
  if($("#issuedList"))$("#issuedList").innerHTML=state.issued.map(x=>`<div class="row"><strong>${esc(x)}</strong></div>`).join("")||"<p>Выданных документов нет</p>";
  renderMedo();renderArchive();renderCorp();renderDict();renderReports();renderDiagnostics();renderDelegation();renderSpecial();
 }
-function openDoc(id){let d=state.docs.find(x=>x.id===id);if(!d)return;$("#drawerTitle").textContent=d.number+" · "+d.title;let actions=[];
+function openDoc(id){let d=state.docs.find(x=>x.id===id);if(!d)return;let linked=(d.links||[]).map(x=>state.docs.find(y=>y.id===x)).filter(Boolean);$("#drawerTitle").textContent=d.number+" · "+d.title;let actions=[];
  if(d.status==="Черновик"||d.status==="На доработке")actions.push(["На согласование","approve"]);
  if(d.status==="На согласовании")actions.push(["Согласовать","agreed"],["Вернуть на доработку","rework"]);
  if(d.status==="Согласован"||d.status==="На подписании")actions.push(["Подписать УКЭП","sign"]);
  if(d.status==="Подписан")actions.push(["Зарегистрировать","register"]);
  if(d.status==="Зарегистрирован")actions.push(["Создать поручение","assignment"],["Передать в архив","archive"],["Отправить по МЭДО","medosend"]);
  let extra=specialPanel(d);
- $("#drawerBody").innerHTML=`<div class="summary"><div class="field"><span>Тип</span><strong>${esc(d.type)}</strong></div><div class="field"><span>Статус</span><strong>${esc(d.status)}</strong></div><div class="field"><span>Ответственный</span><strong>${esc(d.owner)}</strong></div><div class="field"><span>Доступ</span><strong>${esc(d.access)}</strong></div></div><div class="actions">${actions.map(a=>`<button class="${a[1]==="agreed"||a[1]==="sign"||a[1]==="register"?"primary":""}" data-doc-action="${a[1]}" data-id="${d.id}">${a[0]}</button>`).join("")}<button data-link-doc="${d.id}">Связать документ</button></div>${extra}<h3>История</h3><ul class="route">${(d.history||[]).map(x=>`<li><strong>${esc(x)}</strong></li>`).join("")||"<li>История пуста</li>"}</ul>`;
+ $("#drawerBody").innerHTML=`<div class="summary"><div class="field"><span>Тип</span><strong>${esc(d.type)}</strong></div><div class="field"><span>Статус</span><strong>${esc(d.status)}</strong></div><div class="field"><span>Ответственный</span><strong>${esc(d.owner)}</strong></div><div class="field"><span>Доступ</span><strong>${esc(d.access)}</strong></div></div><div class="actions">${actions.map(a=>`<button class="${a[1]==="agreed"||a[1]==="sign"||a[1]==="register"?"primary":""}" data-doc-action="${a[1]}" data-id="${d.id}">${a[0]}</button>`).join("")}<button data-link-doc="${d.id}">Связать документ</button></div>${extra}<h3>Связанные документы</h3><div class="route">${linked.length?linked.map(x=>`<div class="row" data-doc="${x.id}"><div><strong>${esc(x.number)}</strong><span>${esc(x.title)}</span></div><span class="badge">${esc(x.status)}</span></div>`).join(""):"<p>Связанных документов нет</p>"}</div><h3>История</h3><ul class="route">${(d.history||[]).map(x=>`<li><strong>${esc(x)}</strong></li>`).join("")||"<li>История пуста</li>"}</ul>`;
  $("#drawer").classList.add("open");$("#backdrop").classList.add("show");
 }
 function mutateDoc(id,action){let d=state.docs.find(x=>x.id===id);if(!d)return;d.history=d.history||[];
