@@ -113,3 +113,22 @@ function contractPanel(d){if(d.type!=="Договор")return "";ensureContract(
 <div class="wf"><h3>Местонахождение подлинника</h3><div class="summary"><div class="field"><span>Архивариус</span><strong>${o.archivist||"—"}</strong></div><div class="field"><span>Дата передачи в архив</span><strong>${o.archiveDate||"—"}</strong></div><div class="field"><span>Номенклатурная папка</span><strong>${o.folder||"—"}</strong></div><div class="field"><span>Количество листов</span><strong>${o.pages||"—"}</strong></div><div class="field"><span>Кому выдан</span><strong>${o.issuedTo||"—"}</strong></div><div class="field"><span>Экземпляр</span><strong>${o.copyNo||"—"}</strong></div></div><button data-original="${d.id}">Редактировать местонахождение</button></div>`}
 const contractOpenDoc=openDoc;openDoc=function(id){contractOpenDoc(id);let d=docs.find(x=>x.id===id),body=$("#drawerBody");if(d&&body)body.insertAdjacentHTML("beforeend",contractPanel(d))}
 document.addEventListener("click",e=>{let p=e.target.closest("[data-contract-prep]");if(p){let d=ensureContract(docs.find(x=>x.id===p.dataset.contractPrep));d.contract.preparation="Завершена";wfLog(d,"Подготовка договора к подписанию завершена");openDoc(d.id);return}let cp=e.target.closest("[data-counterparty]");if(cp){let d=ensureContract(docs.find(x=>x.id===cp.dataset.counterparty));d.contract.counterpartySign=true;d.contract.counterparty="Подписан";wfLog(d,"Зафиксировано подписание договора контрагентом");openDoc(d.id);return}let ob=e.target.closest("[data-original]");if(ob){let d=ensureContract(docs.find(x=>x.id===ob.dataset.original)),o=d.contract.original;o.archivist=prompt("Архивариус",o.archivist||"Архивариус")||o.archivist;o.archiveDate=prompt("Дата передачи в архив",o.archiveDate||new Date().toLocaleDateString("ru-RU"))||o.archiveDate;o.folder=prompt("Номенклатурная папка",o.folder||"")||o.folder;o.pages=prompt("Количество листов",o.pages||"")||o.pages;o.issuedTo=prompt("Сотрудник, которому выдан экземпляр",o.issuedTo||"")||o.issuedTo;o.copyNo=prompt("Номер экземпляра",o.copyNo||"")||o.copyNo;wfLog(d,"Обновлено местонахождение подлинника договора");openDoc(d.id)}})
+
+/* EOSDO contract lifecycle */
+function isContract(d){return d.type==="Договор"}
+function ensureContract(d){ensureWorkflow(d);d.contract=d.contract||{stage:"Проект",counterpartySigned:false,originalReceived:false,archiveTransferred:false,closed:false};return d}
+function contractPanel(d){if(!isContract(d))return "";let x=ensureContract(d).contract;
+return `<div class="wf"><h3>Договорная работа</h3>
+<div class="row"><span>Этап</span><strong>${x.stage}</strong></div>
+<div class="row"><span>Подпись контрагента</span><span class="badge">${x.counterpartySigned?"Получена":"Ожидается"}</span></div>
+<div class="row"><span>Оригинал договора</span><span class="badge">${x.originalReceived?"Получен":"Ожидается"}</span></div>
+<div class="row"><span>Передача в архив</span><span class="badge">${x.archiveTransferred?"Передан":"Не передан"}</span></div>
+<div class="actions"><button data-contract="counterparty" data-id="${d.id}">Подпись контрагента</button><button data-contract="original" data-id="${d.id}">Получить оригинал</button><button data-contract="archive" data-id="${d.id}">Передать в архив</button><button data-contract="close" data-id="${d.id}">Завершить договор</button></div></div>`}
+const contractOpenDoc=openDoc;
+openDoc=function(id){contractOpenDoc(id);let d=docs.find(x=>x.id===id),body=$("#drawerBody");if(d&&body)body.insertAdjacentHTML("beforeend",contractPanel(d))}
+document.addEventListener("click",e=>{let b=e.target.closest("[data-contract]");if(!b)return;let d=ensureContract(docs.find(x=>x.id===b.dataset.id)),x=d.contract;
+if(b.dataset.contract==="counterparty"){x.counterpartySigned=true;x.stage="Подписание";wfLog(d,"Получена подпись контрагента")}
+if(b.dataset.contract==="original"){x.originalReceived=true;x.stage="Оригинал получен";wfLog(d,"Получен оригинал договора")}
+if(b.dataset.contract==="archive"){x.archiveTransferred=true;x.stage="Передан в архив";wfLog(d,"Оригинал договора передан в архив")}
+if(b.dataset.contract==="close"){x.closed=true;x.stage="Исполнен";d.status="Зарегистрирован";wfLog(d,"Работа по договору завершена")}
+render();openDoc(d.id)});
