@@ -1,112 +1,14 @@
-<!doctype html>
-<html lang="ru">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="Поток — прототип системы электронного документооборота">
-  <title>Поток — документооборот</title>
-  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%2313293d'/%3E%3Cpath d='M18 16h20l8 8v24H18z' fill='%23f7f9fb'/%3E%3Cpath d='M38 16v10h9M24 34h16M24 41h12' fill='none' stroke='%2322a88a' stroke-width='4' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
-  <link rel="stylesheet" href="styles.css">
-</head>
-<body>
-  <div class="app-shell">
-    <aside class="sidebar" id="sidebar" aria-label="Основная навигация">
-      <div class="brand"><span class="brand-mark">П</span><span>Поток</span></div>
-      <nav class="nav-list">
-        <button class="nav-item active" data-view="overview"><span>Обзор</span><span class="nav-count">4</span></button>
-        <button class="nav-item" data-view="documents"><span>Документы</span><span class="nav-count" id="documentsCount">0</span></button>
-        <button class="nav-item" data-view="tasks"><span>Мои задачи</span><span class="nav-count" id="tasksCount">0</span></button>
-        <button class="nav-item" data-view="archive"><span>Архив</span></button>
-      </nav>
-      <div class="sidebar-foot">
-        <div class="user-avatar">АК</div>
-        <div><strong>Анна Крылова</strong><span>Делопроизводитель</span></div>
-      </div>
-    </aside>
-
-    <main class="main">
-      <header class="topbar">
-        <button class="menu-button" id="menuButton" aria-label="Открыть меню">☰</button>
-        <div class="search-wrap">
-          <label class="sr-only" for="globalSearch">Поиск документов</label>
-          <input id="globalSearch" type="search" placeholder="Номер, название или автор…" autocomplete="off">
-          <kbd>Ctrl K</kbd>
-        </div>
-        <button class="primary-button" id="createButton">+ Новый документ</button>
-      </header>
-
-      <section class="view active" id="overviewView" aria-labelledby="overviewTitle">
-        <div class="page-heading">
-          <div><p class="eyebrow">Среда, 16 сентября</p><h1 id="overviewTitle">Рабочий стол</h1></div>
-          <p class="heading-note">Сфокусируйтесь на задачах, где решение нужно сегодня.</p>
-        </div>
-
-        <div class="metric-grid">
-          <button class="metric-card" data-view-target="tasks"><span>Требуют решения</span><strong id="urgentMetric">0</strong><small>На сегодня</small></button>
-          <button class="metric-card" data-view-target="documents"><span>На согласовании</span><strong id="approvalMetric">0</strong><small>Активные маршруты</small></button>
-          <div class="metric-card"><span>Исполнено вовремя</span><strong>92%</strong><small>За последние 30 дней</small></div>
-        </div>
-
-        <div class="workspace-grid">
-          <section class="panel">
-            <div class="panel-heading"><div><p class="eyebrow">Приоритет</p><h2>Ближайшие задачи</h2></div><button class="text-button" data-view-target="tasks">Все задачи →</button></div>
-            <div id="priorityTasks" class="task-list"></div>
-          </section>
-          <section class="panel activity-panel">
-            <div class="panel-heading"><div><p class="eyebrow">События</p><h2>Последние изменения</h2></div></div>
-            <ol class="activity-list" id="activityList"></ol>
-          </section>
-        </div>
-
-        <section class="panel recent-panel">
-          <div class="panel-heading"><div><p class="eyebrow">В работе</p><h2>Недавние документы</h2></div><button class="text-button" data-view-target="documents">Открыть реестр →</button></div>
-          <div class="table-wrap"><table><thead><tr><th>Документ</th><th>Тип</th><th>Статус</th><th>Ответственный</th><th>Срок</th></tr></thead><tbody id="recentDocuments"></tbody></table></div>
-        </section>
-      </section>
-
-      <section class="view" id="documentsView" aria-labelledby="documentsTitle">
-        <div class="page-heading compact"><div><p class="eyebrow">Единый реестр</p><h1 id="documentsTitle">Документы</h1></div></div>
-        <div class="filter-row" role="group" aria-label="Фильтр документов">
-          <button class="filter active" data-filter="all">Все</button>
-          <button class="filter" data-filter="На согласовании">На согласовании</button>
-          <button class="filter" data-filter="Исполнен">Исполнены</button>
-          <button class="filter" data-filter="Черновик">Черновики</button>
-        </div>
-        <section class="panel registry-panel">
-          <div class="table-wrap"><table><thead><tr><th>Рег. номер</th><th>Название</th><th>Статус</th><th>Автор</th><th>Обновлён</th></tr></thead><tbody id="documentsTable"></tbody></table></div>
-          <div class="empty-state" id="documentsEmpty" hidden><strong>Ничего не найдено</strong><span>Измените запрос или выберите другой фильтр.</span></div>
-        </section>
-      </section>
-
-      <section class="view" id="tasksView" aria-labelledby="tasksTitle">
-        <div class="page-heading compact"><div><p class="eyebrow">Личная очередь</p><h1 id="tasksTitle">Мои задачи</h1></div></div>
-        <div class="task-board" id="taskBoard"></div>
-      </section>
-
-      <section class="view" id="archiveView" aria-labelledby="archiveTitle">
-        <div class="page-heading compact"><div><p class="eyebrow">Долговременное хранение</p><h1 id="archiveTitle">Архив</h1></div></div>
-        <section class="panel archive-box"><div class="archive-icon">✓</div><h2>Документы под контролем</h2><p>Завершённые документы сохраняются вместе с версиями, маршрутами и журналом действий.</p><strong id="archiveCount">0 документов в архиве</strong></section>
-      </section>
-    </main>
-  </div>
-
-  <dialog id="createDialog">
-    <form method="dialog" id="createForm">
-      <div class="dialog-heading"><div><p class="eyebrow">Регистрация</p><h2>Новый документ</h2></div><button type="button" class="icon-button" data-close-dialog aria-label="Закрыть">×</button></div>
-      <label>Название<input name="title" required maxlength="120" placeholder="Например, Приказ о назначении…"></label>
-      <div class="form-grid"><label>Тип<select name="type"><option>Служебная записка</option><option>Приказ</option><option>Договор</option><option>Входящее письмо</option></select></label><label>Срок исполнения<input name="due" type="date" required></label></div>
-      <label>Ответственный<input name="owner" required value="Анна Крылова"></label>
-      <label>Комментарий<textarea name="comment" rows="3" placeholder="Кратко опишите суть документа"></textarea></label>
-      <div class="dialog-actions"><button type="button" data-close-dialog class="secondary-button">Отмена</button><button type="submit" value="default" class="primary-button">Создать документ</button></div>
-    </form>
-  </dialog>
-
-  <aside class="detail-drawer" id="detailDrawer" aria-hidden="true" aria-labelledby="detailTitle">
-    <div class="drawer-head"><div><p class="eyebrow">Карточка документа</p><h2 id="detailTitle"></h2></div><button class="icon-button" id="closeDrawer" aria-label="Закрыть карточку">×</button></div>
-    <div id="detailContent"></div>
-  </aside>
-  <div class="backdrop" id="backdrop" hidden></div>
-  <div class="toast" id="toast" role="status" aria-live="polite"></div>
-  <script src="app.js"></script>
-</body>
-</html>
+<!doctype html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="ЕОСДО Lite — электронный документооборот"><title>ЕОСДО Lite</title><link rel="stylesheet" href="styles.css"></head><body>
+<div class="shell"><aside id="side"><div class="brand"><b>Е</b><span>ЕОСДО <small>Lite</small></span></div><button class="nav active" data-view="home">Рабочий стол</button><button class="nav" data-view="tasks">Задачи / уведомления <i id="taskN"></i></button><button class="nav" data-view="docs">Документы <i id="docN"></i></button><button class="nav" data-view="archive">Оперативный архив</button><button class="nav" data-view="corp">Корпоративная информация</button><button class="nav" data-view="dict">Справочники</button><button class="nav" data-view="reports">Отчёты</button><div class="user"><strong>Алексей</strong><span>Пользователь системы</span><button id="substitute">Настроить замещение</button></div></aside>
+<main><header><button id="menu">☰</button><div class="search"><input id="q" placeholder="Поиск по номеру, названию, атрибутам…"><button id="searchBtn">Найти</button></div><button class="primary" id="newDoc">+ Создать проект документа</button></header>
+<section class="view active" id="homeView"><div class="title"><div><small>Единая отраслевая система</small><h1>Рабочий стол</h1></div><p>Документы, задачи, согласование и исполнение в одном контуре.</p></div><div class="metrics"><article><span>Мои задачи</span><strong id="mTasks">0</strong></article><article><span>На согласовании</span><strong id="mApproval">0</strong></article><article><span>На подписании</span><strong id="mSign">0</strong></article><article><span>Зарегистрировано</span><strong id="mReg">0</strong></article></div><div class="grid"><section class="panel"><div class="ph"><h2>Задачи и уведомления</h2><button data-go="tasks">Все →</button></div><div id="homeTasks"></div></section><section class="panel"><div class="ph"><h2>Недавние документы</h2><button data-go="docs">Реестр →</button></div><div id="homeDocs"></div></section></div></section>
+<section class="view" id="tasksView"><div class="title"><div><small>Рабочая очередь</small><h1>Задачи / уведомления</h1></div></div><div class="tabs"><button class="chip active" data-taskfilter="all">Все</button><button class="chip" data-taskfilter="Согласование">Согласование</button><button class="chip" data-taskfilter="Подписание">Подписание</button><button class="chip" data-taskfilter="Исполнение">Исполнение</button></div><section class="panel"><div id="taskList"></div></section></section>
+<section class="view" id="docsView"><div class="title"><div><small>Единый реестр</small><h1>Документы</h1></div></div><div class="tabs" id="docFilters"></div><section class="panel table"><table><thead><tr><th>№</th><th>Документ</th><th>Тип</th><th>Статус</th><th>Ответственный</th></tr></thead><tbody id="docTable"></tbody></table></section></section>
+<section class="view" id="archiveView"><div class="title"><div><small>Номенклатура дел</small><h1>Оперативный архив</h1></div></div><div class="tree panel"><b>АО «Организация»</b><span>▾ 2026</span><span>　▾ Управление снабжения</span><span>　　▾ Описи дел структурного подразделения</span><span>　　　01-01 Договоры</span><span>　　　01-02 Служебная переписка</span><span>　　Акты о передаче дел на оперативное хранение</span></div></section>
+<section class="view" id="corpView"><div class="title"><div><small>Справочная информация</small><h1>Корпоративная информация</h1></div><button class="primary" id="addOrg">+ Добавить организацию</button></div><section class="panel cards" id="orgs"></section></section>
+<section class="view" id="dictView"><div class="title"><div><small>Стандарты и классификаторы</small><h1>Справочники</h1></div></div><section class="panel"><div class="dictbar"><select id="dictSelect"><option>Типы документов</option><option>Уровни доступа</option><option>Срочность</option><option>Виды договоров</option></select><button class="primary" id="addDict">+ Добавить элемент</button></div><div id="dictItems"></div></section></section>
+<section class="view" id="reportsView"><div class="title"><div><small>Аналитика</small><h1>Отчёты</h1></div></div><div class="cards"><article><h3>Исполнение поручений</h3><p>Статусы, сроки и ответственные.</p><button data-report="Исполнение поручений">Показать отчёт</button></article><article><h3>Документы по статусам</h3><p>Сводка движения документов.</p><button data-report="Документы по статусам">Показать отчёт</button></article><article><h3>Статус доставки МЭДО</h3><p>Имитация отчёта интеграции.</p><button data-report="Статус доставки МЭДО">Показать отчёт</button></article></div></section>
+</main></div>
+<dialog id="createDlg"><form id="createForm"><div class="dh"><div><small>Новый объект</small><h2>Создать проект документа</h2></div><button type="button" data-close>×</button></div><label>Тип документа<select name="type" id="type"><option>Распорядительный документ</option><option>Договор</option><option>Заявка на доверенность</option><option>Исходящий документ</option><option>Входящий документ</option><option>Вопрос</option><option>Повестка дня</option><option>Протокол</option><option>Решение</option><option>Лист исполнения</option></select></label><label>Заголовок<input name="title" required></label><div class="cols"><label>Срочность<select name="urgency"><option>Обычная</option><option>Срочно</option><option>Весьма срочно</option></select></label><label>Уровень доступа<select name="access"><option>Общий</option><option>Ограниченный</option></select></label></div><label>Ответственный<input name="owner" value="Алексей" required></label><label>Комментарий<textarea name="comment"></textarea></label><div class="actions"><button type="button" data-close>Отмена</button><button class="primary">Завершить</button></div></form></dialog>
+<aside id="drawer"><div class="dh"><div><small>Карточка документа</small><h2 id="drawerTitle"></h2></div><button id="drawerClose">×</button></div><div id="drawerBody"></div></aside><div id="backdrop"></div><div id="toast"></div>
+<script src="app.js"></script></body></html>
