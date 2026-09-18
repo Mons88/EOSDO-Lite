@@ -246,3 +246,10 @@ const masterRender=render;render=function(){masterRender();renderDict();renderOr
 window.addEventListener("error",e=>{try{console.error("EOSDO runtime:",e.error||e.message)}catch(_){}});
 function safeShow(view){let target=$("#"+view+"View");if(!target){toast("Раздел пока недоступен");return false}show(view);return true}
 document.addEventListener("click",e=>{let n=e.target.closest("[data-view]");if(n&&!$("#"+n.dataset.view+"View")){e.preventDefault();e.stopImmediatePropagation();toast("Раздел пока недоступен")}});
+
+
+/* EOSDO final integrity helpers */
+function eosdoSelfCheck(){let required=["homeView","docsView","tasksView","createDlg","drawer","docTable","reportsView","medoView","auditView"],missing=required.filter(id=>!document.getElementById(id));let result={ok:missing.length===0,missing,documents:docs.length,checkedAt:new Date().toLocaleString("ru-RU")};localStorage.setItem("eosdo-lite-last-selfcheck",JSON.stringify(result));if(!result.ok)console.error("EOSDO self-check failed",result);return result}
+function resetDemoData(){if(!confirm("Сбросить локальные данные EOSDO-Lite и восстановить демонстрационные документы?"))return;localStorage.removeItem(KEY);localStorage.removeItem("eosdo-lite-extra-v1");localStorage.removeItem("eosdo-lite-archive-v1");localStorage.removeItem("eosdo-lite-medo-v1");localStorage.removeItem("eosdo-lite-sign-v1");localStorage.removeItem("eosdo-lite-master-v1");location.reload()}
+window.EOSDO={selfCheck:eosdoSelfCheck,resetDemoData};
+eosdoSelfCheck();
