@@ -21,3 +21,41 @@
   aside#side.open{transform:translateX(0)!important}
   #backdrop.menu-open{display:block!important;z-index:70!important}
 }
+
+/* Mobile layout v2 */
+@media(max-width:900px){
+  html,body{overflow-x:hidden!important}
+  main{margin-left:0!important;width:100%!important;min-width:0!important}
+  header{
+    box-sizing:border-box!important;position:sticky!important;top:0!important;
+    display:grid!important;grid-template-columns:44px minmax(0,1fr) 44px!important;
+    align-items:center!important;width:100%!important;height:64px!important;min-height:64px!important;
+    padding:10px 12px!important;gap:8px!important;overflow:hidden!important;flex-wrap:nowrap!important
+  }
+  #menu{display:block!important;width:44px!important;height:44px!important;margin:0!important;padding:0!important}
+  header .search{display:block!important;width:100%!important;min-width:0!important;max-width:none!important;margin:0!important}
+  header .search input{display:block!important;width:100%!important;min-width:0!important;height:44px!important;box-sizing:border-box!important;margin:0!important}
+  header .search button{display:none!important}
+  header>#barcodeBtn,header>#registerDocBtn,header>#helpBtn,header>#supportBtn,header>#logoutBtn{display:none!important}
+  #newDoc{display:block!important;width:44px!important;height:44px!important;min-width:44px!important;margin:0!important;padding:0!important;font-size:0!important}
+  #newDoc:after{content:"+"!important;font-size:24px!important;line-height:44px!important}
+  .view{box-sizing:border-box!important;width:100%!important;padding:22px 14px 48px!important}
+  .title{display:block!important;margin-bottom:18px!important}
+  .title h1{font-size:30px!important;line-height:1.1!important}
+  .title p{max-width:none!important;margin-top:8px!important}
+  .metrics{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:10px!important}
+  .metrics article{min-width:0!important;padding:16px!important}
+  .grid,.cards{grid-template-columns:minmax(0,1fr)!important}
+  .panel{min-width:0!important;max-width:100%!important}
+  .table{max-width:100%!important;overflow-x:auto!important}
+  aside#side{position:fixed!important;left:0!important;top:0!important;bottom:0!important;width:min(310px,86vw)!important;z-index:100!important;transform:translateX(-105%)!important;overflow-y:auto!important}
+  aside#side.open{transform:translateX(0)!important}
+  #backdrop.menu-open{display:block!important;position:fixed!important;inset:0!important;z-index:90!important;background:#0a243666!important}
+}
+@media(max-width:420px){
+  header{grid-template-columns:42px minmax(0,1fr) 42px!important;padding:9px 10px!important}
+  #menu,#newDoc{width:42px!important;height:42px!important;min-width:42px!important}
+  header .search input{height:42px!important}
+  .view{padding-left:12px!important;padding-right:12px!important}
+  .title h1{font-size:28px!important}
+}
