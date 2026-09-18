@@ -126,4 +126,11 @@ if($("#q"))$("#q").addEventListener("input",render);
 if($("#searchBtn"))$("#searchBtn").addEventListener("click",()=>show("docs"));
 window.addEventListener("error",e=>{let t=$("#toast");if(t){t.textContent="Ошибка: "+e.message;t.classList.add("show")}});
 render();show("home");
+
+/* Mobile navigation */
+const mobileMenu=$("#menu"), sideMenu=$("#side"), pageBackdrop=$("#backdrop");
+if(mobileMenu&&sideMenu){
+  mobileMenu.addEventListener("click",e=>{e.preventDefault();e.stopPropagation();sideMenu.classList.toggle("open");if(pageBackdrop)pageBackdrop.classList.toggle("menu-open",sideMenu.classList.contains("open"));});
+  sideMenu.addEventListener("click",e=>{if(e.target.closest(".nav")&&window.matchMedia("(max-width:900px)").matches){sideMenu.classList.remove("open");if(pageBackdrop)pageBackdrop.classList.remove("menu-open");}});
+}
 })();
