@@ -77,3 +77,52 @@
  #createDlg .actions{position:sticky;bottom:-16px;background:#fff;padding:10px 0 16px;z-index:2}
  #createDlg .actions button{min-height:44px}
 }
+
+/* Full mobile adaptation */
+@media(max-width:600px){
+ body{font-size:14px}
+ .view{overflow-x:hidden!important}
+ .title{min-width:0!important}
+ .title small{display:block;overflow-wrap:anywhere}
+ .title h1{overflow-wrap:anywhere}
+ .title>.actions,.title>button,.dictbar,.drawerActions{width:100%!important;max-width:100%!important}
+ .title>.actions{display:grid!important;grid-template-columns:1fr!important;margin-top:12px}
+ .title>button{margin-top:12px;min-height:44px}
+ .actions{flex-wrap:wrap!important}
+ .actions button{min-height:42px;max-width:100%;white-space:normal}
+ .ph{padding:13px 14px!important;gap:8px}
+ .ph h2{font-size:16px;min-width:0;overflow-wrap:anywhere}
+ .row{grid-template-columns:minmax(0,1fr)!important;padding:12px 14px!important}
+ .row>button,.row>.badge{justify-self:start}
+ .tabs,.cardtabs{display:flex!important;flex-wrap:nowrap!important;overflow-x:auto!important;overscroll-behavior-x:contain;-webkit-overflow-scrolling:touch;padding-bottom:4px}
+ .chip,.cardtabs button{flex:0 0 auto}
+ .dictbar{display:grid!important;grid-template-columns:minmax(0,1fr)!important;padding:12px!important}
+ .dictbar select,.dictbar input,.dictbar button{width:100%!important;min-width:0!important;min-height:42px}
+ .dictitem{gap:8px;align-items:flex-start}
+ .cards article{min-width:0}
+ .tree{padding:16px!important;overflow-x:auto!important}
+ .tree span{overflow-wrap:anywhere}
+ .table table{min-width:720px}
+ #auditView .table table{min-width:680px}
+ #docsView .table table{min-width:760px}
+ #reportWorkspace{overflow-x:auto!important}
+ #reportWorkspace table{min-width:600px}
+ #calendarWorkspace{overflow-x:auto}
+ .cal-grid,.calendar-grid{min-width:330px}
+ #drawer{width:100%!important;max-width:100%!important;padding:16px!important;padding-bottom:calc(20px + env(safe-area-inset-bottom))!important}
+ #drawer .dh{position:sticky;top:-16px;background:#fff;z-index:2;padding:10px 0}
+ #drawer .dh h2{font-size:22px;overflow-wrap:anywhere}
+ #drawer .summary{grid-template-columns:minmax(0,1fr)!important}
+ #drawer .field{min-width:0;overflow-wrap:anywhere}
+ #drawer .drawerActions{display:grid!important;grid-template-columns:minmax(0,1fr)!important}
+ #drawer .drawerActions button{width:100%!important;min-height:44px;white-space:normal}
+ #toast{left:12px!important;right:12px!important;bottom:calc(12px + env(safe-area-inset-bottom))!important;max-width:none!important}
+ dialog:not(#createDlg){width:calc(100vw - 24px)!important;max-width:calc(100vw - 24px)!important;max-height:88dvh!important;margin:auto!important;overflow:auto!important}
+ dialog:not(#createDlg) form{padding:16px!important}
+ #substitutionWorkspace,#substitutionList,#assistantList,#queueWorkspace,#ordersList,#controlList,#reservedList,#issuedList,#orgs,#templateList,#medoList,#medoDetails,#diagnosticsResult{min-width:0!important;max-width:100%!important}
+}
+@media(max-width:380px){
+ .metrics{grid-template-columns:minmax(0,1fr)!important}
+ .title h1{font-size:26px!important}
+ .cal-grid,.calendar-grid{min-width:310px}
+}
