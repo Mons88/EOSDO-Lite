@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Поток — прототип системы электронного документооборота">
+  <title>Поток — документооборот</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%2313293d'/%3E%3Cpath d='M18 16h20l8 8v24H18z' fill='%23f7f9fb'/%3E%3Cpath d='M38 16v10h9M24 34h16M24 41h12' fill='none' stroke='%2322a88a' stroke-width='4' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar" id="sidebar" aria-label="Основная навигация">
+      <div class="brand"><span class="brand-mark">П</span><span>Поток</span></div>
+      <nav class="nav-list">
+        <button class="nav-item active" data-view="overview"><span>Обзор</span><span class="nav-count">4</span></button>
+        <button class="nav-item" data-view="documents"><span>Документы</span><span class="nav-count" id="documentsCount">0</span></button>
+        <button class="nav-item" data-view="tasks"><span>Мои задачи</span><span class="nav-count" id="tasksCount">0</span></button>
+        <button class="nav-item" data-view="archive"><span>Архив</span></button>
+      </nav>
+      <div class="sidebar-foot">
+        <div class="user-avatar">АК</div>
+        <div><strong>Анна Крылова</strong><span>Делопроизводитель</span></div>
+      </div>
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <button class="menu-button" id="menuButton" aria-label="Открыть меню">☰</button>
+        <div class="search-wrap">
+          <label class="sr-only" for="globalSearch">Поиск документов</label>
+          <input id="globalSearch" type="search" placeholder="Номер, название или автор…" autocomplete="off">
+          <kbd>Ctrl K</kbd>
+        </div>
+        <button class="primary-button" id="createButton">+ Новый документ</button>
+      </header>
+
+      <section class="view active" id="overviewView" aria-labelledby="overviewTitle">
+        <div class="page-heading">
+          <div><p class="eyebrow">Среда, 16 сентября</p><h1 id="overviewTitle">Рабочий стол</h1></div>
+          <p class="heading-note">Сфокусируйтесь на задачах, где решение нужно сегодня.</p>
+        </div>
+
+        <div class="metric-grid">
+          <button class="metric-card" data-view-target="tasks"><span>Требуют решения</span><strong id="urgentMetric">0</strong><small>На сегодня</small></button>
+          <button class="metric-card" data-view-target="documents"><span>На согласовании</span><strong id="approvalMetric">0</strong><small>Активные маршруты</small></button>
+          <div class="metric-card"><span>Исполнено вовремя</span><strong>92%</strong><small>За последние 30 дней</small></div>
+        </div>
+
+        <div class="workspace-grid">
+          <section class="panel">
+            <div class="panel-heading"><div><p class="eyebrow">Приоритет</p><h2>Ближайшие задачи</h2></div><button class="text-button" data-view-target="tasks">Все задачи →</button></div>
+            <div id="priorityTasks" class="task-list"></div>
+          </section>
+          <section class="panel activity-panel">
+            <div class="panel-heading"><div><p class="eyebrow">События</p><h2>Последние изменения</h2></div></div>
+            <ol class="activity-list" id="activityList"></ol>
+          </section>
+        </div>
+
+        <section class="panel recent-panel">
+          <div class="panel-heading"><div><p class="eyebrow">В работе</p><h2>Недавние документы</h2></div><button class="text-button" data-view-target="documents">Открыть реестр →</button></div>
+          <div class="table-wrap"><table><thead><tr><th>Документ</th><th>Тип</th><th>Статус</th><th>Ответственный</th><th>Срок</th></tr></thead><tbody id="recentDocuments"></tbody></table></div>
+        </section>
+      </section>
+
+      <section class="view" id="documentsView" aria-labelledby="documentsTitle">
+        <div class="page-heading compact"><div><p class="eyebrow">Единый реестр</p><h1 id="documentsTitle">Документы</h1></div></div>
+        <div class="filter-row" role="group" aria-label="Фильтр документов">
+          <button class="filter active" data-filter="all">Все</button>
+          <button class="filter" data-filter="На согласовании">На согласовании</button>
+          <button class="filter" data-filter="Исполнен">Исполнены</button>
+          <button class="filter" data-filter="Черновик">Черновики</button>
+        </div>
+        <section class="panel registry-panel">
+          <div class="table-wrap"><table><thead><tr><th>Рег. номер</th><th>Название</th><th>Статус</th><th>Автор</th><th>Обновлён</th></tr></thead><tbody id="documentsTable"></tbody></table></div>
+          <div class="empty-state" id="documentsEmpty" hidden><strong>Ничего не найдено</strong><span>Измените запрос или выберите другой фильтр.</span></div>
+        </section>
+      </section>
+
+      <section class="view" id="tasksView" aria-labelledby="tasksTitle">
+        <div class="page-heading compact"><div><p class="eyebrow">Личная очередь</p><h1 id="tasksTitle">Мои задачи</h1></div></div>
+        <div class="task-board" id="taskBoard"></div>
+      </section>
+
+      <section class="view" id="archiveView" aria-labelledby="archiveTitle">
+        <div class="page-heading compact"><div><p class="eyebrow">Долговременное хранение</p><h1 id="archiveTitle">Архив</h1></div></div>
+        <section class="panel archive-box"><div class="archive-icon">✓</div><h2>Документы под контролем</h2><p>Завершённые документы сохраняются вместе с версиями, маршрутами и журналом действий.</p><strong id="archiveCount">0 документов в архиве</strong></section>
+      </section>
+    </main>
+  </div>
+
+  <dialog id="createDialog">
+    <form method="dialog" id="createForm">
+      <div class="dialog-heading"><div><p class="eyebrow">Регистрация</p><h2>Новый документ</h2></div><button type="button" class="icon-button" data-close-dialog aria-label="Закрыть">×</button></div>
+      <label>Название<input name="title" required maxlength="120" placeholder="Например, Приказ о назначении…"></label>
+      <div class="form-grid"><label>Тип<select name="type"><option>Служебная записка</option><option>Приказ</option><option>Договор</option><option>Входящее письмо</option></select></label><label>Срок исполнения<input name="due" type="date" required></label></div>
+      <label>Ответственный<input name="owner" required value="Анна Крылова"></label>
+      <label>Комментарий<textarea name="comment" rows="3" placeholder="Кратко опишите суть документа"></textarea></label>
+      <div class="dialog-actions"><button type="button" data-close-dialog class="secondary-button">Отмена</button><button type="submit" value="default" class="primary-button">Создать документ</button></div>
+    </form>
+  </dialog>
+
+  <aside class="detail-drawer" id="detailDrawer" aria-hidden="true" aria-labelledby="detailTitle">
+    <div class="drawer-head"><div><p class="eyebrow">Карточка документа</p><h2 id="detailTitle"></h2></div><button class="icon-button" id="closeDrawer" aria-label="Закрыть карточку">×</button></div>
+    <div id="detailContent"></div>
+  </aside>
+  <div class="backdrop" id="backdrop" hidden></div>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <script src="app.js"></script>
+</body>
+</html>
