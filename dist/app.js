@@ -263,3 +263,9 @@ renderDiagnostics();
 /* EOSDO workflow smoke checks */
 function workflowSmokeCheck(){let checks=[];function add(name,ok){checks.push({name,ok:!!ok})}add("Навигация",$$("[data-view]").length>0&&$$(".view").length>0);add("Создание документа",!!$("#newDoc")&&!!$("#createForm")&&!!$("#createDlg"));add("Карточка документа",typeof openDoc==="function"&&!!$("#drawer"));add("Поиск",!!$("#q")&&!!$("#docTable"));add("МЭДО",!!$("#medoView")&&typeof renderMedo==="function");add("Отчёты",!!$("#reportsView")&&typeof renderReport==="function");add("Архив",!!$("#archiveView")&&!!$("#orgarchiveView"));add("УКЭП",typeof signaturePanel==="function");add("Справочники",typeof renderDict==="function"&&typeof renderOrgs==="function");return checks}
 const oldRenderDiagnostics=renderDiagnostics;renderDiagnostics=function(){oldRenderDiagnostics();let el=$("#diagnosticsResult");if(!el)return;let checks=workflowSmokeCheck();el.insertAdjacentHTML("beforeend","<h3>Сквозная проверка модулей</h3>"+checks.map(x=>`<div class="row"><strong>${x.name}</strong><span class="badge ${x.ok?"reg":"rework"}">${x.ok?"OK":"Ошибка"}</span></div>`).join(""))};
+
+
+/* EOSDO release readiness */
+function releaseReadiness(){let checks=workflowSmokeCheck(),bad=checks.filter(x=>!x.ok);return {ok:bad.length===0,checks,failed:bad.map(x=>x.name),version:"0.9.5",at:new Date().toLocaleString("ru-RU")}}
+function renderReleaseReadiness(){let el=$("#diagnosticsResult");if(!el)return;let r=releaseReadiness();el.insertAdjacentHTML("beforeend",`<h3>Готовность сборки</h3><div class="row"><div><strong>EOSDO-Lite ${r.version}</strong><span>${r.ok?"Критические компоненты конфигурации найдены":"Есть ошибки конфигурации: "+r.failed.join(", ")}</span></div><span class="badge ${r.ok?"reg":"rework"}">${r.ok?"READY":"CHECK"}</span></div>`)}
+const readinessDiagnostics=renderDiagnostics;renderDiagnostics=function(){readinessDiagnostics();renderReleaseReadiness()};
