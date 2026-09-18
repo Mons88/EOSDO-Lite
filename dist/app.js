@@ -13,3 +13,20 @@ const typeFieldMap={
 };
 function renderTypeFields(){let type=$("#type").value,fields=typeFieldMap[type]||[];$("#typeFields").innerHTML=fields.map(([label,name])=>`<label>${label}<input name="${name}"></label>`).join("")}
 $("#type").addEventListener("change",renderTypeFields);renderTypeFields();
+
+const EXTRA_KEY="eosdo-lite-extra-v1";
+let extra=JSON.parse(localStorage.getItem(EXTRA_KEY)||"null")||{audit:[],orders:[{id:"o1",title:"Ознакомиться с входящим запросом",owner:"Алексей",due:"2026-09-21",status:"На исполнении"}],reserved:[],issued:[],substitutes:[],assistants:[],savedSearches:[]};
+function saveExtra(){localStorage.setItem(EXTRA_KEY,JSON.stringify(extra))}
+function logAudit(action,obj){extra.audit.unshift({date:new Date().toLocaleString("ru-RU"),user:"Алексей",action,obj});saveExtra();renderExtra()}
+function renderExtra(){
+let at=$("#auditTable");if(at)at.innerHTML=(extra.audit.length?extra.audit:[{date:"—",user:"—",action:"События появятся после действий в системе",obj:"—"}]).map(x=>`<tr><td>${x.date}</td><td>${x.user}</td><td>${x.action}</td><td>${x.obj}</td></tr>`).join("");
+let ol=$("#ordersList");if(ol)ol.innerHTML=extra.orders.map(o=>`<div class="row"><div><strong>${o.title}</strong><span>Исполнитель: ${o.owner} · срок: ${o.due}</span></div><span class="badge approval">${o.status}</span></div>`).join("");
+let cl=$("#controlList");if(cl)cl.innerHTML=extra.orders.filter(o=>o.status!=="Исполнено").map(o=>`<div class="row"><div><strong>${o.title}</strong><span>Контрольный срок: ${o.due}</span></div><button data-finish-order="${o.id}">Исполнить</button></div>`).join("")||'<div class="row"><strong>Незавершённых контрольных поручений нет</strong></div>';
+let rl=$("#reservedList");if(rl)rl.innerHTML=extra.reserved.map(n=>`<div class="row"><strong>${n}</strong><span class="badge reg">Зарезервирован</span></div>`).join("")||'<div class="row"><strong>Зарезервированных номеров нет</strong></div>';
+let il=$("#issuedList");if(il)il.innerHTML=extra.issued.map(x=>`<div class="row"><div><strong>${x.doc}</strong><span>${x.to}</span></div><span>${x.date}</span></div>`).join("")||'<div class="row"><strong>Выданных оригиналов нет</strong></div>';
+}
+document.addEventListener("click",e=>{let fin=e.target.closest("[data-finish-order]");if(fin){let o=extra.orders.find(x=>x.id===fin.dataset.finishOrder);if(o){o.status="Исполнено";saveExtra();logAudit("Исполнено поручение",o.title);toast("Поручение исполнено")}}});
+$("#freeOrder").onclick=()=>{let title=prompt("Текст поручения");if(!title)return;let due=prompt("Срок исполнения, например 25.09.2026","25.09.2026")||"не указан";extra.orders.unshift({id:String(Date.now()),title,owner:"Алексей",due,status:"На исполнении"});saveExtra();logAudit("Создано свободное поручение",title);toast("Поручение создано")};
+$("#reserveBtn").onclick=()=>{let n="РЗ-2026-"+String(extra.reserved.length+1).padStart(4,"0");extra.reserved.unshift(n);saveExtra();logAudit("Зарезервирован номер",n);toast("Номер "+n+" зарезервирован")};
+const oldMutate=mutate;mutate=function(id,act){let d=docs.find(x=>x.id===id),name=d?d.number:"Документ";oldMutate(id,act);logAudit("Операция: "+act,name)};
+renderExtra();
